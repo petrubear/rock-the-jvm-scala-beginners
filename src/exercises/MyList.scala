@@ -24,7 +24,7 @@ abstract class MyList[+A] {
 
 }
 
-object Empty extends MyList[Nothing] {
+case object Empty extends MyList[Nothing] {
   override def head: Nothing = throw new NoSuchElementException
 
   override def tail: MyList[Nothing] = throw new NoSuchElementException
@@ -44,7 +44,7 @@ object Empty extends MyList[Nothing] {
   override def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
 }
 
-class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
+case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
   override def head: A = h
 
   override def tail: MyList[A] = t
@@ -81,6 +81,7 @@ class EvenPredicate[Int] extends MyPredicate[Int] {
 
 object ListTest extends App {
   var listOfInts = new Cons[Int](1, new Cons[Int](2, new Cons[Int](3, Empty)))
+  var cloneListOfInts = new Cons[Int](1, new Cons[Int](2, new Cons[Int](3, Empty)))
   var newListOfInts = new Cons[Int](4, new Cons[Int](5, new Cons[Int](6, Empty)))
   var listOfStrings = new Cons[String]("a", new Cons[String]("b", new Cons[String]("c", Empty)))
   println(listOfInts.toString)
@@ -91,5 +92,6 @@ object ListTest extends App {
   println(listOfInts.flatMap(new MyTransformer[Int, MyList[Int]] {
     override def transform(element: Int): MyList[Int] = new Cons(element, new Cons(element + 1, Empty))
   }))
+  println(listOfInts == cloneListOfInts)
 }
 
