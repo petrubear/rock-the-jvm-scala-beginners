@@ -1,5 +1,7 @@
 package exercises
 
+import java.util.NoSuchElementException
+
 abstract class MyList[+A] {
 
   def head: A
@@ -22,6 +24,13 @@ abstract class MyList[+A] {
 
   def ++[B >: A](list: MyList[B]): MyList[B]
 
+  def foreach(f: A => Unit)
+
+  def sort(f: (A, A) => Int): MyList[A]
+
+  def zipWith[B, C](list: MyList[B], f: (A, B) => C): MyList[C]
+
+  def fold[B](start: B)(operator: (B, A) => B): B
 }
 
 case object Empty extends MyList[Nothing] {
@@ -42,6 +51,16 @@ case object Empty extends MyList[Nothing] {
   override def flatMap[B](transformer: Nothing => MyList[B]): MyList[B] = Empty
 
   override def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
+
+  override def foreach(f: Nothing => Unit): Unit = ()
+
+  override def sort(f: (Nothing, Nothing) => Int): MyList[Nothing] = Empty
+
+  override def zipWith[B, C](list: MyList[B], f: (Nothing, B) => C): MyList[C] = {
+    if (list.isEmpty) Empty else throw new RuntimeException("List doesnt have the same size")
+  }
+
+  override def fold[B](start: B)(operator: (B, Nothing) => B): B = start
 }
 
 case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
@@ -65,6 +84,28 @@ case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
     transformer.apply(head) ++ tail.flatMap(transformer)
 
   override def ++[B >: A](list: MyList[B]): MyList[B] = new Cons[B](head, tail ++ list)
+
+  override def foreach(f: A => Unit): Unit = {
+    f(head)
+    tail.foreach(f)
+  }
+
+  override def sort(f: (A, A) => Int): MyList[A] = {
+    def insert(x: A, sortedList: MyList[A]): MyList[A] =
+      if (sortedList.isEmpty) new Cons(x, Empty)
+      else if (f(x, sortedList.head) <= 0) new Cons(x, sortedList)
+      else new Cons(sortedList.head, insert(x, sortedList.tail))
+
+    val sortedTail = t.sort(f)
+    insert(h, sortedTail)
+  }
+
+  override def zipWith[B, C](list: MyList[B], f: (A, B) => C): MyList[C] =
+    if (list.isEmpty) throw new RuntimeException("Lists do not have the same length")
+    else Cons(f(h, list.head), t.zipWith(list.tail, f))
+
+  override def fold[B](start: B)(operator: (B, A) => B): B =
+    t.fold(operator(start, h))(operator)
 }
 
 object ListTest extends App {
@@ -80,5 +121,15 @@ object ListTest extends App {
   println(listOfInts ++ newListOfInts)
   println(listOfInts.flatMap(element => Cons(element, Cons(element + 1, Empty))))
   println(listOfInts == cloneListOfInts)
+
+  println(s"foreach: $listOfInts")
+  listOfInts.foreach((x: Int) => println(x + 10))
+  println("Sort")
+  println(listOfInts.sort((x, y) => y - x))
+  println("Zip")
+  println(listOfInts.zipWith(newListOfInts, (x: Int, y: Int) => x * y))
+  println(listOfInts.zipWith(newListOfInts, (x: Int, y: Int) => s"$x + $y = ${x + y};"))
+  println("Fold")
+  println(listOfInts.fold(0)(_ + _))
 }
 
