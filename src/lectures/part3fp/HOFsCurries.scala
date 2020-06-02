@@ -1,6 +1,6 @@
 package lectures.part3fp
 
-class HOFsCurries {
+object HOFsCurries extends App {
 
   val superFunction: (Int, (String, (Int => Boolean)) => Int) => (Int => Int) = null
   // higher order function (HOF)
@@ -91,4 +91,15 @@ class HOFsCurries {
   println(ordered(4))
 
 
+  def compose2[A, B, C](g: B => C, f: A => B): A => C =
+    x => g(f(x))
+
+  val f = (x:Int) => x * 2
+  val g = (x:Int) => x * 4
+
+  val composed2 = compose2(add2, times3)
+  val h = compose2(f, g)
+  println(composed2(4))
+
+  println(h(9))
 }
