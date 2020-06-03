@@ -131,5 +131,12 @@ object ListTest extends App {
   println(listOfInts.zipWith(newListOfInts, (x: Int, y: Int) => s"$x + $y = ${x + y};"))
   println("Fold")
   println(listOfInts.fold(0)(_ + _))
+
+  // for comprehensions
+  val combinations = for {
+    n <- listOfInts
+    string <- listOfStrings
+  } yield n + "-" + string
+  println(combinations)
 }
 
