@@ -95,34 +95,34 @@ object TuplesAndMaps extends App {
 
 
   //tests
-  val empty: Map[String, Set[String]] = Map()
+  val my_empty: Map[String, Set[String]] = Map()
   private val p1 = "Edison"
   private val p2 = "Luna"
   private val p3 = "Vale"
-  var network = my_add(empty, p1)
-  println(network)
-  val removed = my_remove(network, p1)
+  var my_network = my_add(my_empty, p1)
+  println(my_network)
+  val removed = my_remove(my_network, p1)
   println(removed)
 
-  network = my_add(empty, p1)
-  network = my_add(network, p2)
-  network = my_friend(network, p1, p2)
-  println(network)
+  my_network = my_add(my_empty, p1)
+  my_network = my_add(my_network, p2)
+  my_network = my_friend(my_network, p1, p2)
+  println(my_network)
 
-  network = my_add(network, p3)
-  network = my_friend(network, p1, p3)
-  println(network)
-  network = my_unfriend(network, p1, p2)
-  println(network)
-  network = my_friend(network, p1, p2)
-  println(network)
-  println(my_friends(network, "er"))
-  println(my_friends(network, p1))
+  my_network = my_add(my_network, p3)
+  my_network = my_friend(my_network, p1, p3)
+  println(my_network)
+  my_network = my_unfriend(my_network, p1, p2)
+  println(my_network)
+  my_network = my_friend(my_network, p1, p2)
+  println(my_network)
+  println(my_friends(my_network, "er"))
+  println(my_friends(my_network, p1))
 
-  network = add(network, "Pam")
-  println(network)
-  println(mostFriends(network))
-  println(my_noFriends(network))
+  my_network = add(my_network, "Pam")
+  println(my_network)
+  println(mostFriends(my_network))
+  println(my_noFriends(my_network))
 
   //instructor
   def add(network: Map[String, Set[String]], person: String): Map[String, Set[String]] =
