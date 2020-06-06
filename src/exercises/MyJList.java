@@ -3,13 +3,13 @@ package exercises;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public abstract class MyJList<Integer> {
-    protected Integer head;
-    protected MyJList<Integer> tail;
+public abstract class MyJList<T> {
+    protected T head;
+    protected MyJList<T> tail;
 
     protected abstract boolean isEmpty();
 
-    protected abstract MyJList<Integer> add(Integer element);
+    protected abstract MyJList<? super T> add(T element);
 
     protected abstract String printElements();
 
@@ -18,17 +18,17 @@ public abstract class MyJList<Integer> {
         return "[" + printElements() + "]";
     }
 
-    protected abstract MyJList<Integer> filter(Predicate<Integer> predicate);
+    protected abstract MyJList<T> filter(Predicate<T> predicate);
 
-    protected abstract MyJList<Integer> map(Function<Integer, Integer> function);
+    protected abstract <A> MyJList<A> map(Function<T, A> function);
 
-    protected abstract MyJList<Integer> flatMap(Function<Integer, MyJList<Integer>> function);
+    protected abstract <A> MyJList<A> flatMap(Function<T, MyJList<A>> function);
 
-    protected abstract MyJList<Integer> flattern(MyJList<Integer> list);
+    protected abstract MyJList<T> flattern(MyJList<T> list);
 
 }
 
-class JEmpty extends MyJList<Integer> {
+class JEmpty<T> extends MyJList<Object> {
 
     private static JEmpty instance;
 
@@ -48,8 +48,8 @@ class JEmpty extends MyJList<Integer> {
     }
 
     @Override
-    protected MyJList<Integer> add(Integer element) {
-        return new JCons<Integer>(element, new JEmpty());
+    protected MyJList<Object> add(Object element) {
+        return new JCons<>(element, JEmpty.apply());
     }
 
     @Override
@@ -63,34 +63,34 @@ class JEmpty extends MyJList<Integer> {
     }
 
     @Override
-    protected MyJList<Integer> filter(Predicate<Integer> predicate) {
-        return new JEmpty();
+    protected MyJList<Object> filter(Predicate<Object> predicate) {
+        return JEmpty.apply();
     }
 
     @Override
-    protected MyJList<Integer> map(Function<Integer, Integer> function) {
-        return new JEmpty();
+    protected <A> MyJList<A> map(Function<Object, A> function) {
+        return JEmpty.apply();
     }
 
     @Override
-    protected MyJList<Integer> flatMap(Function<Integer, MyJList<Integer>> function) {
-        return new JEmpty();
+    protected <A> MyJList<A> flatMap(Function<Object, MyJList<A>> function) {
+        return JEmpty.apply();
     }
 
     @Override
-    protected MyJList<Integer> flattern(MyJList<Integer> list) {
-        return new JEmpty();
+    protected MyJList<Object> flattern(MyJList<Object> list) {
+        return JEmpty.apply();
     }
 }
 
-class JCons<Integer> extends MyJList<Integer> {
+class JCons<T> extends MyJList<T> {
 
-    public JCons(Integer head, MyJList<Integer> tail) {
+    public JCons(T head, MyJList<T> tail) {
         this.head = head;
         this.tail = tail;
     }
 
-    public JCons<Integer> apply(Integer head, MyJList<Integer> tail) {
+    public JCons<T> apply(T head, MyJList<T> tail) {
         return new JCons<>(head, tail);
     }
 
@@ -100,7 +100,7 @@ class JCons<Integer> extends MyJList<Integer> {
     }
 
     @Override
-    protected MyJList<Integer> add(Integer element) {
+    protected MyJList<? super T> add(T element) {
         return new JCons<>(element, this);
     }
 
@@ -114,7 +114,7 @@ class JCons<Integer> extends MyJList<Integer> {
     }
 
     @Override
-    protected MyJList<Integer> filter(Predicate<Integer> predicate) {
+    protected MyJList<T> filter(Predicate<T> predicate) {
         if (predicate.test(head)) {
             return new JCons<>(head, tail.filter(predicate));
         } else {
@@ -123,28 +123,32 @@ class JCons<Integer> extends MyJList<Integer> {
     }
 
     @Override
-    protected MyJList<Integer> map(Function<Integer, Integer> function) {
-        return new JCons<>(function.apply(head), tail.map(function));
+    protected <A> MyJList<A> map(Function<T, A> function) {
+        return new JCons<A>(function.apply(head), tail.map(function));
     }
 
     @Override
-    protected MyJList<Integer> flatMap(Function<Integer, MyJList<Integer>> function) {
+    protected <A> MyJList<A> flatMap(Function<T, MyJList<A>> function) {
         //Se calculan todos pero solo estoy devolviendo el primero!
         return function.apply(head).flattern(tail.flatMap(function));
     }
 
     @Override
-    protected MyJList<Integer> flattern(MyJList<Integer> list) {
+    protected MyJList<T> flattern(MyJList<T> list) {
         return new JCons<>(head, tail.flattern(list));
     }
 }
 
 class Test {
     public static void main(String... args) {
-        JCons<Integer> listOfInts = new JCons<>(1, new JCons<>(2, new JCons<>(3, JEmpty.apply())));
+        JCons<Integer> listOfInts = new JCons<Integer>(1, new JCons<Integer>(2, new JCons<Integer>(3, JEmpty.apply())));
         System.out.println("listOfInts = " + listOfInts);
         System.out.println("listOfInts = " + listOfInts.filter(i -> i % 2 == 0));
         System.out.println("listOfInts = " + listOfInts.map(i -> i * 42));
         System.out.println("listOfInts = " + listOfInts.flatMap(i -> new JCons<>(i, new JCons<>(i + 1, JEmpty.apply()))));
+        JCons<String> listOfStrings = new JCons<String>("a", new JCons<String>("b", new JCons<String>("c", JEmpty.apply())));
+        System.out.println("listOfStrings = " + listOfStrings);
+        System.out.println("listOfStrings = " + listOfStrings.filter(s -> s.equals("b")));
+        System.out.println("listOfStrings = " + listOfStrings.map(s -> s.concat("__")));
     }
 }
